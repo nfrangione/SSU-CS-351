@@ -114,7 +114,7 @@ clean:
 #   should execute
 test: targets
 	@ for pgm in $(TARGETS) ; do \
-		result=$$($$pgm $(NUM_BLOCKS)) ;\
+		result=$$(./$$pgm $(NUM_BLOCKS)) ;\
 		$(PRINTF) "%-18s %s\n" "$$pgm:" "$$result" ;\
 	done
 
