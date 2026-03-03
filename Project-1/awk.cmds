@@ -1,0 +1,15 @@
+BEGIN {
+    min = 10000000000;
+    max = 0;
+    sum = 0;
+}
+
+{
+    if ($1 < min)  min = $1;
+    if ($1 > max)  max = $1;
+    sum += $1;
+}
+
+END {
+    printf(" min: %f  avg: %f  max: %f\n", min, sum/NR, max);
+}
