@@ -30,7 +30,7 @@ because:
 
 ##Considering either the malloc.cpp or alloca.cpp versions of the program, generate a diagram showing two Node. Include in the diagram the relationship of the head, tail, and Node next pointers. Show the size (in bytes) and structure of a Node that allocated six bytes of data include the bytes pointer, and indicate using an arrow which byte in the allocated memory it points to.
 
-┌─────────┐
+                     ┌─────────┐
           head ─────►│  Node A │
                      ├─────────┴──────────────────────────────────┐
                      │  bytes*    │  8 bytes  │ ──────────────────┼──┐
