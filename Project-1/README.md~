@@ -1,0 +1,35 @@
+##Which program is fastest? Is it always the fastest?
+- malloc is the fastest at large scale. At 1,000,000 blocks it averaged 0.337s,
+beating every other program. At small scale (10,000 blocks) it ties with alloca at
+~0.010s.
+- alloca is not always fastest despite using stack allocation, because it uses recursion to keep stack frames alive, with one recursive call per Node. At 1,000,000 blocks that means 1 million recursive calls, which adds significant overhead. You can see this in the memory usage: alloca used 202,756 KB at 1M blocks while malloc only used 93,324 KB. The recursion cost overtakes the stack allocation benefit at large scale.
+
+##Which program is slowest? Is it always the slowest?
+- List is consistently the slowest across all configurations. At 1,000,000 blocks it averaged 1.332s — nearly 4× slower than malloc.
+  - The reason is that list performs two heap allocations per Node:
+    - std::list::push_back allocates an internal list-node wrapper on the heap
+    - The Node constructor triggers a second heap allocation for the std::vector buffer
+    - Every extra allocation adds allocator overhead, increases heap fragmentation, and hurts cache performance. new is a close second (1.207s at 1M blocks) for the same reason — it also allocates the Node struct and the data bytes separately on the heap.
+
+$$Was there a trend in program execution time based on the size of data in each Node? If so, what, and why?
+- Yes, but only visible at larger block counts. At 10,000 blocks the times were flat across all node sizes because the dataset fits in CPU cache regardless of byte size. The trend becomes clear at higher block counts: As node data size increases, heap-based programs (list, new, malloc) slow down
+because:
+  - The data initialization loop (filling each byte) runs longer
+  - Larger heap allocations increase cache pressure — more data scattered across memory means more cache misses during traversal
+- alloca was largely unaffected by node size because all data lives on the stack, which is already in CPU cache. Whether you allocate 10 bytes or 4000 bytes via alloca, the memory is right there in the current stack frame.
+
+##Was there a trend in program execution time based on the length of the block chain?
+  - Yes, runtime scales linearly (O(n)) with NUM_BLOCKS for all programs.
+  - Each additional block requires one allocation and one data-fill (both O(1)), and the hash traversal visits every node once (O(n) total). So doubling the blocks roughly doubles the runtime.
+  - malloc scales the best — lowest per-node cost at every step. alloca's recursion overhead grows with block count, which hurts its scaling.
+  - list scales the worst because two heap allocations per node compounds at large N.
+
+##Consider heap breaks, what's noticeable? Does increasing the stack size affect the heap? Speculate on any similarities and differences in programs?
+  - Every program showed exactly 1 brk() call at every block count (10k, 100k, 1,000,000):
+  - 
+
+##Considering either the malloc.cpp or alloca.cpp versions of the program, generate a diagram showing two Node. Include in the diagram the relationship of the head, tail, and Node next pointers. Show the size (in bytes) and structure of a Node that allocated six bytes of data include the bytes pointer, and indicate using an arrow which byte in the allocated memory it points to. There's an overhead to allocating memory, initializing it, and eventually processing (in our case, hashing it).
+
+##For each program, were any of these tasks the same? Which one(s) were different?
+
+##As the size of data in a Node increases, does the significance of allocating the node increase or decrease?

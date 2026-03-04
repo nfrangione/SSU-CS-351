@@ -138,7 +138,7 @@ trials: targets
 	for pgm in $(TARGETS) ; do \
 		$(PRINTF) "%s (list length = %d):\n" $$pgm $(NUM_BLOCKS) ;\
 		for t in {1..$(NUM_TRIALS)} ; do \
-			( $(TIME) $$pgm $(NUM_BLOCKS) > /dev/null ) 2>&1 | tee -a $(LOG) ;\
+			( $(TIME) ./$$pgm $(NUM_BLOCKS) > /dev/null ) 2>&1 | tee -a $(LOG) ;\
 		done ;\
 		cat $(LOG) | $(AWK) ;\
 		$(PRINTF) "\n" ;\
