@@ -5,7 +5,7 @@ beating every other program. At small scale (10,000 blocks) it ties with alloca 
 - alloca is not always fastest despite using stack allocation, because it uses recursion to keep stack frames alive, with one recursive call per Node. At 1,000,000 blocks that means 1 million recursive calls, which adds significant overhead. You can see this in the memory usage: alloca used 202,756 KB at 1M blocks while malloc only used 93,324 KB. The recursion cost overtakes the stack allocation benefit at large scale.
 
 ## Which program is slowest? Is it always the slowest?
-- List is consistently the slowest across all configurations. At 1,000,000 blocks it averaged 1.332s — nearly 4× slower than malloc.
+- List is consistently the slowest across all configurations. At 1,000,000 blocks it averaged 1.332s, nearly 4× slower than malloc.
   - The reason is that list performs two heap allocations per Node:
     - std::list::push_back allocates an internal list-node wrapper on the heap
     - The Node constructor triggers a second heap allocation for the std::vector buffer
@@ -21,12 +21,12 @@ because:
 ## Was there a trend in program execution time based on the length of the block chain?
   - Yes, runtime scales linearly (O(n)) with NUM_BLOCKS for all programs.
   - Each additional block requires one allocation and one data-fill (both O(1)), and the hash traversal visits every node once (O(n) total). So doubling the blocks roughly doubles the runtime.
-  - malloc scales the best — lowest per-node cost at every step. alloca's recursion overhead grows with block count, which hurts its scaling.
+  - malloc scales the best, with the lowest per-node cost at every step. alloca's recursion overhead grows with block count, which hurts its scaling.
   - list scales the worst because two heap allocations per node compounds at large N.
 
 ## Consider heap breaks, what's noticeable? Does increasing the stack size affect the heap? Speculate on any similarities and differences in programs?
   - Every program showed exactly 1 brk() call at every block count (10k, 100k, 1,000,000):
-  - The stack and heap are completely separate memory regions that grow toward each other from opposite ends of the address space. ulimit -s unlimited only raises the ceiling on how far the stack is allowed to grow downward — it says nothing to the heap and the heap allocator doesn't even know it happened.
+  - The stack and heap are completely separate memory regions that grow toward each other from opposite ends of the address space. ulimit -s unlimited only raises the ceiling on how far the stack is allowed to grow downward, as it says nothing to the heap and the heap allocator doesn't even know it happened.
 
 ## Considering either the malloc.cpp or alloca.cpp versions of the program, generate a diagram showing two Node. Include in the diagram the relationship of the head, tail, and Node next pointers. Show the size (in bytes) and structure of a Node that allocated six bytes of data include the bytes pointer, and indicate using an arrow which byte in the allocated memory it points to.
 
