@@ -9,7 +9,7 @@ beating every other program. At small scale (10,000 blocks) it ties with alloca 
   - The reason is that list performs two heap allocations per Node:
     - std::list::push_back allocates an internal list-node wrapper on the heap
     - The Node constructor triggers a second heap allocation for the std::vector buffer
-    - Every extra allocation adds allocator overhead, increases heap fragmentation, and hurts cache performance. new is a close second (1.207s at 1M blocks) for the same reason — it also allocates the Node struct and the data bytes separately on the heap.
+    - Every extra allocation adds allocator overhead, increases heap fragmentation, and hurts cache performance. new is a close second (1.207s at 1M blocks) for the same reason, as it also allocates the Node struct and the data bytes separately on the heap.
 
 ## Was there a trend in program execution time based on the size of data in each Node? If so, what, and why?
 - Yes, but only visible at larger block counts. At 10,000 blocks the times were flat across all node sizes because the dataset fits in CPU cache regardless of byte size. The trend becomes clear at higher block counts: As node data size increases, heap-based programs (list, new, malloc) slow down
